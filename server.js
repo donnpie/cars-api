@@ -1,7 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const fileName = 'cars.json';
-
+//const cors = require('cors');
 
 const app = express();
 
@@ -10,23 +10,46 @@ const port = process.env.PORT || 8080;
 //Body parser
 app.use(express.json());
 
+//Cross origin permission
+// app.use(cors({
+//     origin: ['*','http://localhost:3000', process.env.PORT]
+// }));
+
 app.get('/api', (req, res) => {
+    //Get all cars
     const cars = getAllItems();
     res.json(cars);
 });
 
 app.get('/api/:id', (req, res) => {
+    //View a specific car
     const car = findItem(req.params.id);
     res.json(car);
 });
 
+app.put('/api/:id', (req, res) => {
+    //Update an existing car
+    const id = parseInt(req.params.id);
+    let car = findItem(id);
+    console.log(car);
+    if (car) {
+        deleteItem(id);
+        car.make = req.body.make ? req.body.make : car.make;
+        car.model = req.body.model ? req.body.model : car.model;
+        car.seats = req.body.seats ? req.body.seats : car.seats;
+        addItemWithId(id, car.make, car.model, car.seats);
+    }
+    res.json(car);
+});
+
 app.post('/api', (req, res) => {
-    //const car = findItem(req.params.id);
-    const id = req.body.id;
+    //Add a new car
+    //console.log('processing post request');
     const make = req.body.make;
     const model = req.body.model;
     const seats = req.body.seats;
-    addItem(id, make, model, seats)
+    const id = addItem(make, model, seats)
+    console.log('id: ', id);
     res.json(
         {
             id: id,
@@ -38,6 +61,8 @@ app.post('/api', (req, res) => {
 });
 
 app.delete('/api/:id', (req, res) => {
+    //Delete a car
+    console.log('processing delete request');
     const id = req.params.id;
     const car = findItem(id);
     if (car) {
@@ -46,26 +71,15 @@ app.delete('/api/:id', (req, res) => {
     res.json(car);
 });
 
-app.put('/api/:id', (req, res) => {
-    const id = req.params.id;
-    let car = findItem(id);
-    console.log(car);
-    if (car) {
-        deleteItem(id);
-        car.make = req.body.make ? req.body.make : car.make;
-        car.model = req.body.model ? req.body.model : car.model;
-        car.seats = req.body.seats ? req.body.seats : car.seats;
-        addItem(id, car.make, car.model, car.seats);
-    }
-    res.json(car);
-});
 
 //Utility functions
 //Read all items
 function getAllItems(){
     try {
-        const content = fs.readFileSync('cars.json');
-        return JSON.parse(content);
+        let content = fs.readFileSync('cars.json');
+        let data = JSON.parse(content);
+        data = data.sort((x, y) => x.id - y.id);
+        return data;
     }catch(e){ // file non-existent
         fs.writeFileSync('cars.json', '[]')
         return []
@@ -82,17 +96,44 @@ function findItem(id) {
         return [];
     }
 }
+
+function getMaxId(cars) {
+    //Finds the max id for the given list of cars
+    let maxSoFar = 0;
+    cars.forEach(car => {
+        //console.log('id', car.id)
+        if (car.id > maxSoFar) maxSoFar = car.id;
+    });
+    return  maxSoFar;
+}
+
 //Insert new item
-function addItem(id, make, model, seats) {
+function addItem(make, model, seats) {
     const cars = getAllItems(); 
+    const maxId = getMaxId(cars);
+    //console.log('max', maxId)
     const car = {
-        id,
+        id: maxId + 1,
         make,
         model,
         seats
     };
     cars.push(car);
     fs.writeFileSync('cars.json', JSON.stringify(cars));
+    return car.id;
+}
+
+function addItemWithId(id, make, model, seats) {
+    const cars = getAllItems(); 
+    const car = {
+        id: id,
+        make,
+        model,
+        seats
+    };
+    cars.push(car);
+    fs.writeFileSync('cars.json', JSON.stringify(cars));
+    return car.id;
 }
 
 //Delete an item
@@ -105,7 +146,3 @@ function deleteItem(id) {
 app.listen(port, () => {
     console.log(`Server listenining on port ${port}`);
 })
-
-
-
-

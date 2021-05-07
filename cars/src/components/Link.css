@@ -1,0 +1,22 @@
+.link-container{
+    font-size: 20px;
+    display: flex;
+    align-content: center;
+}
+
+.link-container a:hover{
+    color: white;
+    background-color: #3575db;
+    transition: color, background-color ease 300ms;
+    
+}
+
+.link-container a {
+    border-radius: 5px;
+    border-style: none;
+    background-color: lightgrey;
+    margin: 20px 20px;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: black;
+}
