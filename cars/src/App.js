@@ -11,12 +11,12 @@ import AddCar from './components/AddCar.jsx';
 import DeleteCar from './components/DeleteCar.jsx';
 
 //For Heroku deployment
-if (process.env.NODE_ENV === 'production'){
-  app.use(express.static(path.join(__dirname, 'cars/build')));
-  app.get('*',(req,res)=> {res.sendFile(path.resolve(__dirname,
-  'cars', 'build','index.html'));
-  });
-}
+// if (process.env.NODE_ENV === 'production'){
+//   app.use(express.static(path.join(__dirname, 'cars/build')));
+//   app.get('*',(req,res)=> {res.sendFile(path.resolve(__dirname,
+//   'cars', 'build','index.html'));
+//   });
+// }
   
 
 
