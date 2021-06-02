@@ -1,3 +1,5 @@
+//components/viewAll.jsx
+
 import React from 'react';
 import './ViewAll.css';
 import { Table } from 'react-bootstrap';
